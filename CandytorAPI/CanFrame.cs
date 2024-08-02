@@ -9,14 +9,22 @@ namespace CandytorAPI {
 	public record class CanMessage(uint ID, byte[] Bytes, DateTime TimeReceived);
 
 	public class CanFrame {
-		public uint ID { get; set; }
+		public uint ID {
+			get; set;
+		}
 
-		public int DLC { get; set; }
+		public int DLC {
+			get; set;
+		}
 
-		public string Name { get; set; }
+		public string Name {
+			get; set;
+		}
 
 		[Browsable(false)]
-		public byte[] Bytes { get; set; }
+		public byte[] Bytes {
+			get; set;
+		}
 
 		public string BytesView {
 			get {
@@ -27,9 +35,13 @@ namespace CandytorAPI {
 			}
 		}
 
-		public int Frequency { get; set; }
+		public int Frequency {
+			get; set;
+		}
 
-		public int Count { get; set; }
+		public int Count {
+			get; set;
+		}
 
 		public CanFrame(uint ID) {
 			this.ID = ID;
@@ -38,6 +50,21 @@ namespace CandytorAPI {
 		public CanFrame(uint ID, byte[] Bytes) : this(ID) {
 			this.Bytes = Bytes;
 			this.DLC = Bytes.Length;
+		}
+
+		public bool IsEqual(CanFrame Other) {
+			if (Other.ID != ID)
+				return false;
+
+			if (Other.DLC != DLC)
+				return false;
+
+			for (int i = 0; i < DLC; i++) {
+				if (Other.Bytes[i] != Bytes[i])
+					return false;
+			}
+
+			return true;
 		}
 
 		public override string ToString() {

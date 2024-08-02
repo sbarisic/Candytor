@@ -1,7 +1,9 @@
 ﻿using CandytorAPI;
+
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 
 namespace CanTest {
@@ -113,25 +115,49 @@ namespace CanTest {
 			];
 
 
-			string[] Lines = Directory.GetFiles("C:\\Users\\SašaBarišić\\Desktop\\Cangaroo\\logs\\", "*.candump").SelectMany(File.ReadAllLines).ToArray();
+			string[] Lines = Directory.GetFiles("C:\\Projects\\Candytor\\can_logs2", "*.candump").SelectMany(File.ReadAllLines).ToArray();
 			CanFrame[] Frames = Lines.Select(ParseLine).ToArray();
 
-			//Frames = Frames.Where(Frame => Frame.ID == 0x0C9).ToArray();
 
+			uint[] DistinctIDs = Frames.Select(F => F.ID).Distinct().Order().ToArray();
 
-			//uint[] ECU_IDs = Frames.Where(F => TxIDs_BusA.Contains(F.ID)).Select(F => F.ID).Distinct().Order().ToArray();
-			//Console.WriteLine(string.Join("; ", ECU_IDs.Select(N => string.Format("{0:X}", N))));
+			//File.WriteAllText("dist.txt", string.Join("\n", DistinctIDs.Select(DID => string.Format("{0:X}", DID))));
 
-
-
-			for (int i = 0; i < Frames.Length; i++) {
-				Console.WriteLine(Frames[i]);
+			foreach (var DID in DistinctIDs) {
+				Console.WriteLine("Logging {0:X}", DID);
+				LogCanIDs(DID, Frames);
 			}
 
 			Console.WriteLine("Done!");
 			Console.ReadLine();
+		}
 
+		static void LogCanIDs(uint ID, CanFrame[] Frames) {
+			if (ID == 0)
+				return;
 
+			StringBuilder Buf = new StringBuilder();
+
+			Frames = Frames.Where(Frame => Frame.ID == ID).ToArray();
+
+			/*bool AllSame = true;
+
+			for (int i = 1; i < Frames.Length; i++) {
+				if (!Frames[i - 1].IsEqual(Frames[i])) {
+					AllSame = false;
+					break;
+				}
+			}
+
+			if (AllSame)
+				return;*/
+
+			for (int i = 0; i < Frames.Length; i++) {
+				Buf.AppendLine(Frames[i].ToString());
+			}
+
+			File.WriteAllText(string.Format("canlogs2/{0:X}.log", ID), Buf.ToString());
+			//Environment.Exit(0);
 		}
 	}
 }
